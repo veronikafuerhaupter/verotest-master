@@ -1,0 +1,3 @@
+<launch>
+	<node name="vero_node1" pkg="verotest" type="vero_node1" />
+</launch>
