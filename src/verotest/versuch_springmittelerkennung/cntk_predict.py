@@ -2,15 +2,15 @@
 # 1. for an image of width and height being (w, h) pixels, resize image to (w', h'), where w/h = w'/h' and w' x h' = 262144
 # 2. resize network input size to (w', h')
 # 3. pass the image to network and do inference
-# (4. if inference speed is too slow for you, try to make w' x h' smaller, which is defined with DEFAULT_INPUT_SIZE (in object_detection.py or ObjectDetection.cs))
+# (4. if inference speed is too slow for you, try to make w' x h' smaller, which is defined with DEFAULT_INPUT_SIZE (in springmittel_detection.py or ObjectDetection.cs))
 import sys
 import cntk
 import numpy as np
-from PIL import Image, ImageDraw
-from object_detection import ObjectDetection
+from PIL import Image
+from src.verotest.ros.springmittel_detection import ObjectDetection
 
-MODEL_FILENAME = 'model.onnx'
-LABELS_FILENAME = 'labels.txt'
+MODEL_FILENAME = '../SpringmittelDetectionModel/model.onnx'
+LABELS_FILENAME = '../SpringmittelDetectionModel/labels.txt'
 
 class CNTKObjectDetection(ObjectDetection):
     """Object Detection class for CNTK

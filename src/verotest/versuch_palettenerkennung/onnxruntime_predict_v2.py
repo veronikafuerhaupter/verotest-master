@@ -2,7 +2,7 @@
 # 1. for an image of width and height being (w, h) pixels, resize image to (w', h'), where w/h = w'/h' and w' x h' = 262144
 # 2. resize network input size to (w', h')
 # 3. pass the image to network and do inference
-# (4. if inference speed is too slow for you, try to make w' x h' smaller, which is defined with DEFAULT_INPUT_SIZE (in object_detection.py or ObjectDetection.cs))
+# (4. if inference speed is too slow for you, try to make w' x h' smaller, which is defined with DEFAULT_INPUT_SIZE (in springmittel_detection.py or ObjectDetection.cs))
 import os
 import sys
 
@@ -58,10 +58,6 @@ def main(image_filename):
 
     print(predictions)
 
-    return predictions, img_convert, old_width, old_height
-
-
-
     for i in range(0, len(predictions)):
 
         #Experimentations showed reasons for predictions greater 0.5 and smaller 0.8
@@ -83,10 +79,10 @@ def main(image_filename):
             cv2.imwrite('crop3.png', im)
             return predictions
 
-
     return predictions
+    return predictions, img_convert, old_width, old_height
 
-def convert_predictions(self, predictions, img_convert, old_width, old_height)
+def convert_predictions(self, predictions, img_convert, old_width, old_height):
 
     # Measures for desired camera area
     perm_width_left = 305
@@ -128,13 +124,7 @@ def convert_predictions(self, predictions, img_convert, old_width, old_height)
             cv2.imwrite('crop3.png', im)
             return im
 
-        else print('No object detected')
-
-
-
-
-
-
+        else: print('No object detected')
 
 
 def img_crop(self, predictions, image_filename):

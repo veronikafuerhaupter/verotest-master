@@ -10,6 +10,9 @@ class Logger:
     def _add_prefix(self, message):
         return '[' + self.prefix + '] ' + message
 
+    def debug(self, message):
+        rospy.logdebug(self._add_prefix(message))
+
     def info(self, message):
         rospy.loginfo(self._add_prefix(message))
 
@@ -18,3 +21,5 @@ class Logger:
 
     def error(self, message):
         rospy.logerr(self._add_prefix(message))
+
+
