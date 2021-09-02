@@ -6,6 +6,8 @@
 import os
 import sys
 
+from os.path import dirname, realpath, join
+
 import PIL.Image
 import cv2
 import onnxruntime
@@ -15,17 +17,18 @@ from PIL import Image, ImageDraw
 from pallet_detection import ObjectDetection
 import tempfile
 
-MODEL_FILENAME = 'model.onnx'
-LABELS_FILENAME = 'labels.txt'
+__dir = dirname(realpath(__file__))
 
+PALLET_MODEL_FILENAME = join(__dir, '..', 'PalletDetectionModel', 'model.onnx')
+PALLET_LABELS_FILENAME = join(__dir, '..', 'PalletDetectionModel', 'labels.txt')
 
-class ONNXRuntimeObjectDetection(ObjectDetection):
+class ONNXRuntimeObjectDetectionPallet(ObjectDetection):
     """Object Detection class for ONNX Runtime"""
     def __init__(self, model_filename, labels):
-        super(ONNXRuntimeObjectDetection, self).__init__(labels)
+        super(ONNXRuntimeObjectDetectionPallet, self).__init__(labels)
         model = onnx.load(model_filename)
         with tempfile.TemporaryDirectory() as dirpath:
-            temp = os.path.join(dirpath, os.path.basename(MODEL_FILENAME))
+            temp = os.path.join(dirpath, os.path.basename(PALLET_MODEL_FILENAME))
             model.graph.input[0].type.tensor_type.shape.dim[-1].dim_param = 'dim1'
             model.graph.input[0].type.tensor_type.shape.dim[-2].dim_param = 'dim2'
             onnx.save(model, temp)

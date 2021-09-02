@@ -151,6 +151,10 @@ class ObjectDetection(object):
         return self.postprocess(prediction_outputs)
 
     def preprocess(self, image):
+        image = Image.fromarray(image)
+        image = image.convert("RGB") if image.mode != "RGB" else image
+        image = self._update_orientation(image)
+
         ratio = math.sqrt(self.DEFAULT_INPUT_SIZE / image.width / image.height)
         new_width = int(image.width * ratio)
         new_height = int(image.height * ratio)

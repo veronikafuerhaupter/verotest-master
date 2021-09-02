@@ -16,10 +16,10 @@ import tempfile
 MODEL_FILENAME = '../SpringmittelDetectionModel/model.onnx'
 LABELS_FILENAME = '../SpringmittelDetectionModel/labels.txt'
 
-class ONNXRuntimeObjectDetection(ObjectDetection):
+class ONNXRuntimeObjectDetectionSpringmittel(ObjectDetection):
     """Object Detection class for ONNX Runtime"""
     def __init__(self, model_filename, labels):
-        super(ONNXRuntimeObjectDetection, self).__init__(labels)
+        super(ONNXRuntimeObjectDetectionSpringmittel, self).__init__(labels)
         model = onnx.load(model_filename)
         with tempfile.TemporaryDirectory() as dirpath:
             temp = os.path.join(dirpath, os.path.basename(MODEL_FILENAME))

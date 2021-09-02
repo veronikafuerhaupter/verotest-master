@@ -1,3 +1,5 @@
+from os.path import dirname, realpath, join
+
 import rospy
 import cv2
 import numpy as np
@@ -7,15 +9,17 @@ from time import time
 from typing import List, Tuple, Dict
 from PIL import Image
 
-from onnxruntime_predict_pallet import ONNXRuntimeObjectDetection
-from onnxruntime_predict_springmittel import ONNXRuntimeObjectDetection
+from onnxruntime_predict_pallet import ONNXRuntimeObjectDetectionPallet
+from onnxruntime_predict_springmittel import ONNXRuntimeObjectDetectionSpringmittel
 from verotest.ros.ros import Ros
 
-PALLET_MODEL_FILENAME = './PalletDetectionModel/model.onnx'
-PALLET_LABELS_FILENAME = './PalletDetectionModel/labels.txt'
+__dir = dirname(realpath(__file__))
 
-SPRINGMITTEL_MODEL_FILENAME = './SpringmittelDetectionModel/model.onnx'
-SPRINGMITTEL_LABELS_FILENAME = './SpringmittelDetectionModel/labels.txt'
+PALLET_MODEL_FILENAME = join(__dir, '..', 'PalletDetectionModel', 'model.onnx')
+PALLET_LABELS_FILENAME = join(__dir, '..', 'PalletDetectionModel', 'labels.txt')
+
+SPRINGMITTEL_MODEL_FILENAME = join(__dir, '..', 'SpringmittelDetectionModel', 'model.onnx')
+SPRINGMITTEL_LABELS_FILENAME = join(__dir, '..', 'SpringmittelDetectionModel', 'labels.txt')
 
 
 class Imagehandler:
@@ -47,10 +51,14 @@ class Imagehandler:
         if found is None:
             return print('No matching pairs found')
         self.match_list.append([found['img'], img['depth']])
+        #self.match_list.append({'img':found['img'], 'depth':img['depth']})
+        #self.match_list.append(found, img)
 
+        #color = self.match_list[0][0]
+        #depth = self.match_list[0][1]
         return found
 
-    def crop_perm_area(self, found, img):
+    def crop_perm_area(self, found):
         """
         This method crops the colored images. Later on, the final net will need to identify the position of the Springmittel Minus.
         Therefore, it is necessary to eliminate part of the picture where the position of the Springmittel in the pallet cannot be identified anymore.
@@ -63,19 +71,17 @@ class Imagehandler:
         perm_height_top = 40
         perm_height_bottom = 690
 
-        color = found['img']
-        depth = img['depth']
+        color = self.match_list[0][0]
+        depth = self.match_list[0][1]
 
-        #Convert to PIL image format for height, width and predictions (Azure uses PIL format for prediction)
-        color_cropped = cv2.cvtColor(color, cv2.COLOR_BGR2RGB)
-        col_pil = Image.fromarray(color_cropped)
-        depth_pil = Image.fromarray(depth)
+        color_cropped = color[perm_height_top:perm_height_bottom, perm_width_left:perm_width_right]
+        depth_cropped = depth[int(perm_height_top / 2):int(perm_height_bottom / 2), int(perm_width_left / 2):int(perm_width_right / 2)]
 
-        color_cropped = col_pil.crop((perm_width_left, perm_height_top, perm_width_right, perm_height_bottom))
-        depth_cropped = depth_pil.crop((perm_width_left / 2), (perm_height_top / 2), (perm_width_right / 2), (perm_height_bottom / 2))
+        shape_color = color_cropped.shape
+        shape_depth = depth_cropped.shape
 
-        color_width = color_cropped.width
-        color_height = color_cropped.height
+        color_width = color_cropped.shape[1]
+        color_height = color_cropped.shape[0]
 
         return color_cropped, depth_cropped, color_width, color_height
 
@@ -84,38 +90,43 @@ class Imagehandler:
         with open(PALLET_LABELS_FILENAME, 'r') as f:
             labels = [l.strip() for l in f.readlines()]
 
-        od_model = ONNXRuntimeObjectDetection(PALLET_MODEL_FILENAME, labels)
+        od_model = ONNXRuntimeObjectDetectionPallet(PALLET_MODEL_FILENAME, labels)
         predictions = od_model.predict_image(color_cropped)
 
         return predictions
 
-    def crop_pallet(self, predictions, color_width, color_height, depth_cropped, color_cropped):
+    def crop_pallet(self, predictions, color_width, color_height, color_cropped, depth_cropped):
 
-        pallet_color_cropped = None
         pallet_depth_cropped = None
+        pallet_color_cropped = None
+        pallet_color_height = None
+        pallet_color_width = None
 
         for i in range(0, len(predictions)):
-            if predictions[i]['probability'] < 0.3:
+            if len(predictions) == 0 or predictions[i]['probability'] < 0.3:
                 print("There was no pallet detected")
 
             #The processing of the image is interrupted when the pallet cannot be properly detected, threshold is 0.8
-            elif 0.3 < predictions[i]['probability'] < 0.8:
+            elif 0.3 < predictions[i]['probability'] < 0.75:
                 print("Pallet cannot be detected, please place the pallet more vertical under the camera")
 
-            elif predictions['probability'] > 0.8:
+            elif predictions[i]['probability'] > 0.75:
                 left = int(predictions[i]['boundingBox']['left'] * color_width)
                 top = int(predictions[i]['boundingBox']['top'] * color_height)
                 right = int(left + predictions[i]['boundingBox']['width'] * color_width)
                 bottom = int(top + predictions[i]['boundingBox']['height'] * color_height)
 
-                pallet_color_cropped = color_cropped.crop((left, top, right, bottom))
-                pallet_depth_cropped = depth_cropped.crop((int(left / 2), int(top / 2), int(right / 2), int(bottom / 2)))
+                pallet_color_cropped = color_cropped[top:bottom, left:right]
+                pallet_depth_cropped = depth_cropped[int(top / 2):int(bottom / 2), int(left / 2):int(right / 2)]
 
-                pil_pallet_colorcropped = Image.fromarray(pallet_color_cropped)
-                pil_pallet_depthcropped = Image.fromarray(pallet_depth_cropped)
+                #im = Image.fromarray(pallet_color_cropped)
+                #im.save("test.jpeg")
 
-                pallet_color_width = pil_pallet_colorcropped.width
-                pallet_color_height = pil_pallet_depthcropped.height
+                pallet_color_width = pallet_color_cropped.shape[1]
+                pallet_color_height = pallet_color_cropped.shape[0]
+
+                pallet_depth_width = pallet_depth_cropped.shape[1]
+                pallet_depth_height = pallet_depth_cropped.shape[0]
 
             else:
                 print("There are no detected objects")
@@ -127,7 +138,7 @@ class Imagehandler:
         with open(SPRINGMITTEL_LABELS_FILENAME, 'r') as f:
             labels = [l.strip() for l in f.readlines()]
 
-        od_model = ONNXRuntimeObjectDetection(SPRINGMITTEL_MODEL_FILENAME, labels)
+        od_model = ONNXRuntimeObjectDetectionSpringmittel(SPRINGMITTEL_MODEL_FILENAME, labels)
         predictions_springmittel = od_model.predict_image(pallet_color_cropped)
 
         return predictions_springmittel
@@ -138,31 +149,32 @@ class Imagehandler:
         springmittel_depth_cropped = None
 
         for i in range(0, len(predictions_springmittel)):
-            if predictions_springmittel[i]['probability'] < 0.3:
+            if len(predictions_springmittel) == 0 or predictions_springmittel[i]['probability'] < 0.3:
                 print("There was no springmittel detected")
 
-            elif 0.3 < predictions_springmittel[i]['probability'] < 0.8:
+            elif 0.3 < predictions_springmittel[i]['probability'] < 0.4:
                 print("Springmittel cannot be properly detected")
 
-            elif predictions_springmittel['probability'] > 0.8:
+            elif predictions_springmittel[i]['probability'] > 0.4:
                 left = int(predictions_springmittel[i]['boundingBox']['left'] * pallet_color_width)
                 top = int(predictions_springmittel[i]['boundingBox']['top'] * pallet_color_height)
                 right = int(left + predictions_springmittel[i]['boundingBox']['width'] * pallet_color_width)
                 bottom = int(top + predictions_springmittel[i]['boundingBox']['height'] * pallet_color_height)
 
-                springmittel_color_cropped = pallet_color_cropped.crop((left, top, right, bottom))
-                springmittel_depth_cropped = pallet_depth_cropped.crop((int(left / 2), int(top / 2), int(right / 2), int(bottom / 2)))
+                springmittel_color_cropped = pallet_color_cropped[top:bottom, left:right]
+                springmittel_depth_cropped = pallet_depth_cropped[int(top / 2):int(bottom / 2), int(left / 2):int(right/2)]
 
             else:
                 print("There are no detected objects")
 
             return springmittel_color_cropped, springmittel_depth_cropped
 
-    def list_handling(self, springmittel_color_cropped, springmittel_depth_cropped):
+    def handle_cropped_img(self, springmittel_color_cropped, springmittel_depth_cropped):
 
-        self.cropped_list.append([springmittel_depth_cropped['springmittel_depth'], springmittel_color_cropped['springtmittel_color']])
+        #{'time': timestamp, 'img': img}
+        self.cropped_list.append([[springmittel_color_cropped], [springmittel_depth_cropped]])
 
-
+        return self.cropped_list
 
     def find_entry_temporal_closest_to(self, reference_entry, search_list, threshold=0.5):
         """
@@ -189,13 +201,6 @@ class Imagehandler:
                 closest_distance = time_difference
         return closest_entry
 
-
-
-
-    ros = Ros()
-    ros.subscribe_color_imgs(create_color_list())
-    ros.subscribe_depth_imgs(create_depth_list)
-    ros.spin()
 
 
 

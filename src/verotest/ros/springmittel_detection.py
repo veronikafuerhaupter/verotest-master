@@ -151,10 +151,15 @@ class ObjectDetection(object):
 
     def convert(self, image):
         image = image.convert("RGB") if image.mode != "RGB" else image
+        image = Image.fromarray(image)
         image = self._update_orientation(image)
         return image
 
     def preprocess(self, image):
+        image = Image.fromarray(image)
+        image = image.convert("RGB") if image.mode != "RGB" else image
+        image = self._update_orientation(image)
+
         ratio = math.sqrt(self.DEFAULT_INPUT_SIZE / image.width / image.height)
         new_width = int(image.width * ratio)
         new_height = int(image.height * ratio)
@@ -162,23 +167,6 @@ class ObjectDetection(object):
         new_height = 32 * math.ceil(new_height / 32)
         image = image.resize((new_width, new_height))
         return image
-
-    def prepare_crop(self, image):
-        image = self.convert(image)
-        old_width = image.width
-        old_height = image.height
-
-        inputs = self.preprocess(image)
-        new_width = inputs.width
-        new_height = inputs.height
-
-        ratio2 = new_width / old_width
-        ratio3 = new_height / old_height
-
-        print(ratio2)
-        print(ratio3)
-
-        return ratio2, ratio3, old_width, old_height
 
     def predict(self, preprocessed_inputs):
         """Evaluate the model and get the output

@@ -2,6 +2,7 @@ from os import environ
 from time import time
 
 import rospy
+import numpy as np
 from cv_bridge import CvBridge
 from verotest.logger.logger import Logger
 from verotest.ros.ros_topics import RosTopics
@@ -46,7 +47,7 @@ class Ros:
 
     def stereo_depth_msg_parser(self, msg):
         timestamp = time()
-        return {'time': timestamp, 'depth': bridge.imgmsg_to_cv2(msg, 'passthrough')}
+        return {'time': timestamp, 'depth': np.nan_to_num(bridge.imgmsg_to_cv2(msg, 'passthrough'))}
 
     def is_shutdown(self):
         return rospy.is_shutdown()
@@ -54,10 +55,3 @@ class Ros:
     def spin(self):
         rospy.spin()
 
-
-def test_fn(img):
-    print(img)
-    return img
-
-initiator = Ros()
-initiator.subscribe_color_imgs(test_fn)
