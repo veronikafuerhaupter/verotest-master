@@ -46,19 +46,16 @@ class Imagehandler:
         This method receives depth images from Ros depth topic and saves them as as list.
         It executes the find entry method and creates a list with timely matching color and depth information.
         """
+        counter = 0
         self.reference_entry.append(img)
         found = self.find_entry_temporal_closest_to(img, self.search_list)
         if found is None:
             return print('No matching pairs found')
-        self.match_list.append([found['img'], img['depth']])
-        #self.match_list.append({'img':found['img'], 'depth':img['depth']})
-        #self.match_list.append(found, img)
-
-        #color = self.match_list[0][0]
-        #depth = self.match_list[0][1]
+        self.match_list.append({'color': found['img'], 'depth': img['depth']})
+        print('Match_list'+str(len(self.match_list)))
         return found
 
-    def crop_perm_area(self, found):
+    def crop_perm_area(self, found, img):
         """
         This method crops the colored images. Later on, the final net will need to identify the position of the Springmittel Minus.
         Therefore, it is necessary to eliminate part of the picture where the position of the Springmittel in the pallet cannot be identified anymore.
@@ -71,8 +68,8 @@ class Imagehandler:
         perm_height_top = 40
         perm_height_bottom = 690
 
-        color = self.match_list[0][0]
-        depth = self.match_list[0][1]
+        color = found
+        depth = img
 
         color_cropped = color[perm_height_top:perm_height_bottom, perm_width_left:perm_width_right]
         depth_cropped = depth[int(perm_height_top / 2):int(perm_height_bottom / 2), int(perm_width_left / 2):int(perm_width_right / 2)]
@@ -103,14 +100,14 @@ class Imagehandler:
         pallet_color_width = None
 
         for i in range(0, len(predictions)):
-            if len(predictions) == 0 or predictions[i]['probability'] < 0.3:
-                print("There was no pallet detected")
+            if len(predictions) == 0:
+                return print("There was no pallet detected")
 
             #The processing of the image is interrupted when the pallet cannot be properly detected, threshold is 0.8
-            elif 0.3 < predictions[i]['probability'] < 0.75:
-                print("Pallet cannot be detected, please place the pallet more vertical under the camera")
+            elif predictions[i]['probability'] < 0.6:
+                return print("Pallet cannot be properly detected")
 
-            elif predictions[i]['probability'] > 0.75:
+            elif predictions[i]['probability'] > 0.6:
                 left = int(predictions[i]['boundingBox']['left'] * color_width)
                 top = int(predictions[i]['boundingBox']['top'] * color_height)
                 right = int(left + predictions[i]['boundingBox']['width'] * color_width)
@@ -119,17 +116,13 @@ class Imagehandler:
                 pallet_color_cropped = color_cropped[top:bottom, left:right]
                 pallet_depth_cropped = depth_cropped[int(top / 2):int(bottom / 2), int(left / 2):int(right / 2)]
 
-                #im = Image.fromarray(pallet_color_cropped)
-                #im.save("test.jpeg")
-
                 pallet_color_width = pallet_color_cropped.shape[1]
                 pallet_color_height = pallet_color_cropped.shape[0]
 
                 pallet_depth_width = pallet_depth_cropped.shape[1]
                 pallet_depth_height = pallet_depth_cropped.shape[0]
 
-            else:
-                print("There are no detected objects")
+                print('Pallet cropped')
 
         return pallet_depth_cropped, pallet_color_cropped, pallet_color_height, pallet_color_width
 
@@ -149,13 +142,13 @@ class Imagehandler:
         springmittel_depth_cropped = None
 
         for i in range(0, len(predictions_springmittel)):
-            if len(predictions_springmittel) == 0 or predictions_springmittel[i]['probability'] < 0.3:
+            if len(predictions_springmittel) == 0:
                 print("There was no springmittel detected")
 
-            elif 0.3 < predictions_springmittel[i]['probability'] < 0.4:
+            elif predictions_springmittel[i]['probability'] < 0.3:
                 print("Springmittel cannot be properly detected")
 
-            elif predictions_springmittel[i]['probability'] > 0.4:
+            elif predictions_springmittel[i]['probability'] > 0.3:
                 left = int(predictions_springmittel[i]['boundingBox']['left'] * pallet_color_width)
                 top = int(predictions_springmittel[i]['boundingBox']['top'] * pallet_color_height)
                 right = int(left + predictions_springmittel[i]['boundingBox']['width'] * pallet_color_width)
@@ -163,16 +156,16 @@ class Imagehandler:
 
                 springmittel_color_cropped = pallet_color_cropped[top:bottom, left:right]
                 springmittel_depth_cropped = pallet_depth_cropped[int(top / 2):int(bottom / 2), int(left / 2):int(right/2)]
-
-            else:
-                print("There are no detected objects")
+                print('Springmittel cropped')
 
             return springmittel_color_cropped, springmittel_depth_cropped
 
     def handle_cropped_img(self, springmittel_color_cropped, springmittel_depth_cropped):
 
         #{'time': timestamp, 'img': img}
-        self.cropped_list.append([[springmittel_color_cropped], [springmittel_depth_cropped]])
+        self.cropped_list.append({'color': springmittel_color_cropped, 'depth': springmittel_depth_cropped})
+        print('cropped_list'+str(len(self.cropped_list)))
+        #self.cropped_list.append([[springmittel_color_cropped], [springmittel_depth_cropped]])
 
         return self.cropped_list
 

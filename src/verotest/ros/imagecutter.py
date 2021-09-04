@@ -20,15 +20,15 @@ class Imagecutter:
 
     def create_observations(self, cropped_list):
 
-        length_cropped_list = len(cropped_list[0]['springmittel_depth'])
+        length_cropped_list = len(cropped_list[0]['depth'])
 
         for index, elem in enumerate(cropped_list):
             if (index+1 < length_cropped_list and index - 1 >= 0):
-                prev_depth = cropped_list[index - 1]['springmittel_depth']
-                curr_depth = cropped_list[index]['springmittel_depth']
+                prev_depth = cropped_list[index - 1]['depth']
+                curr_depth = cropped_list[index]['depth']
 
-                prev_color = cropped_list[index - 1]['springmittel_color']
-                curr_color = cropped_list[index]['springmittel_color']
+                prev_color = cropped_list[index - 1]['color']
+                curr_color = cropped_list[index]['color']
 
                 ratio_x_prev = prev_depth.shape[1] / 56
                 ratio_x_curr = curr_depth.shape[1] / 56
@@ -57,21 +57,22 @@ class Imagecutter:
                 avg_depth_prev = numpy.mean(prev_depth[y1_prev:y2_prev, x1_prev:x2_prev])
                 avg_depth_curr = numpy.mean(curr_depth[y1_curr:y2_curr, x1_curr:x2_curr])
 
+                im = Image.fromarray(prev_color)
+                im.save('springmittel03'+str(index)+'.jpeg')
+
                 counter = 0
 
                 if (avg_depth_prev - avg_depth_curr) > 0.0015 and counter < 8:
-                    self.subtractor_list.append([prev_color['observation_color'],
-                                                 prev_depth['observation_depth']])
-                    self.final_image_list.append(prev_color['observation_color'])
+                    self.subtractor_list.append({'observation_color': prev_color, 'observation_depth': prev_depth})
+                    self.final_image_list.append({'observation_color': prev_color})
                     counter = counter + 1
                     im = Image.fromarray(prev_color['observation_color'])
                     im.save('springmittel'+str(index)+'.jpeg')
                     return counter
 
                 elif counter == 7 and index == length_cropped_list and (self.subtractor_list[6]['observation_depth'] - curr_depth) > 0.0015:
-                    self.subtractor_list.append([curr_color['observation_color'],
-                                                 curr_depth['observation_depth']])
-                    self.final_image_list.append(curr_color)
+                    self.subtractor_list.append({'observation_color': curr_color, 'observation_depth': curr_depth})
+                    self.final_image_list.append({'observation_color': curr_color})
                     counter = counter + 1
                     im = Image.fromarray(curr_color['observation_color'])
                     im.save('springmittel' + str(index) + '.jpeg')
@@ -81,7 +82,10 @@ class Imagecutter:
                         print('The observation has been created successfully')
                         exit(0)
 
-                    return self.final_image_list
+                return self.final_image_list
+
+
+
 
 
 
