@@ -100,31 +100,31 @@ class Imagehandler:
         pallet_color_width = None
 
         for i in range(0, len(predictions)):
-            if len(predictions) == 0:
+            '''if len(predictions) == 0:
                 return print("There was no pallet detected")
 
             #The processing of the image is interrupted when the pallet cannot be properly detected, threshold is 0.8
             elif predictions[i]['probability'] < 0.6:
-                return print("Pallet cannot be properly detected")
+                return print("Pallet cannot be properly detected")'''
 
-            elif predictions[i]['probability'] > 0.6:
-                left = int(predictions[i]['boundingBox']['left'] * color_width)
-                top = int(predictions[i]['boundingBox']['top'] * color_height)
-                right = int(left + predictions[i]['boundingBox']['width'] * color_width)
-                bottom = int(top + predictions[i]['boundingBox']['height'] * color_height)
+            #elif predictions[i]['probability'] > 0.6:
+            left = int(predictions[i]['boundingBox']['left'] * color_width)
+            top = int(predictions[i]['boundingBox']['top'] * color_height)
+            right = int(left + predictions[i]['boundingBox']['width'] * color_width)
+            bottom = int(top + predictions[i]['boundingBox']['height'] * color_height)
 
-                pallet_color_cropped = color_cropped[top:bottom, left:right]
-                pallet_depth_cropped = depth_cropped[int(top / 2):int(bottom / 2), int(left / 2):int(right / 2)]
+            pallet_color_cropped = color_cropped[top:bottom, left:right]
+            pallet_depth_cropped = depth_cropped[int(top / 2):int(bottom / 2), int(left / 2):int(right / 2)]
 
-                pallet_color_width = pallet_color_cropped.shape[1]
-                pallet_color_height = pallet_color_cropped.shape[0]
+            pallet_color_width = pallet_color_cropped.shape[1]
+            pallet_color_height = pallet_color_cropped.shape[0]
 
-                pallet_depth_width = pallet_depth_cropped.shape[1]
-                pallet_depth_height = pallet_depth_cropped.shape[0]
+            pallet_depth_width = pallet_depth_cropped.shape[1]
+            pallet_depth_height = pallet_depth_cropped.shape[0]
 
-                print('Pallet cropped')
+            print('Pallet cropped')
 
-        return pallet_depth_cropped, pallet_color_cropped, pallet_color_height, pallet_color_width
+            return pallet_depth_cropped, pallet_color_cropped, pallet_color_height, pallet_color_width
 
     def predict_springmittel(self, pallet_color_cropped):
 
@@ -142,21 +142,21 @@ class Imagehandler:
         springmittel_depth_cropped = None
 
         for i in range(0, len(predictions_springmittel)):
-            if len(predictions_springmittel) == 0:
+            '''if len(predictions_springmittel) == 0:
                 print("There was no springmittel detected")
 
             elif predictions_springmittel[i]['probability'] < 0.3:
                 print("Springmittel cannot be properly detected")
 
-            elif predictions_springmittel[i]['probability'] > 0.3:
-                left = int(predictions_springmittel[i]['boundingBox']['left'] * pallet_color_width)
-                top = int(predictions_springmittel[i]['boundingBox']['top'] * pallet_color_height)
-                right = int(left + predictions_springmittel[i]['boundingBox']['width'] * pallet_color_width)
-                bottom = int(top + predictions_springmittel[i]['boundingBox']['height'] * pallet_color_height)
+            elif predictions_springmittel[i]['probability'] > 0.3:'''
+            left = int(predictions_springmittel[i]['boundingBox']['left'] * pallet_color_width)
+            top = int(predictions_springmittel[i]['boundingBox']['top'] * pallet_color_height)
+            right = int(left + predictions_springmittel[i]['boundingBox']['width'] * pallet_color_width)
+            bottom = int(top + predictions_springmittel[i]['boundingBox']['height'] * pallet_color_height)
 
-                springmittel_color_cropped = pallet_color_cropped[top:bottom, left:right]
-                springmittel_depth_cropped = pallet_depth_cropped[int(top / 2):int(bottom / 2), int(left / 2):int(right/2)]
-                print('Springmittel cropped')
+            springmittel_color_cropped = pallet_color_cropped[top:bottom, left:right]
+            springmittel_depth_cropped = pallet_depth_cropped[int(top / 2):int(bottom / 2), int(left / 2):int(right/2)]
+            print('Springmittel cropped')
 
             return springmittel_color_cropped, springmittel_depth_cropped
 

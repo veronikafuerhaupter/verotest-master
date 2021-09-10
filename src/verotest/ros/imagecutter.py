@@ -20,7 +20,8 @@ class Imagecutter:
 
     def create_observations(self, cropped_list):
 
-        length_cropped_list = len(cropped_list[0]['depth'])
+        length_cropped_list = len(cropped_list)
+        counter = 0
 
         for index, elem in enumerate(cropped_list):
             if (index+1 < length_cropped_list and index - 1 >= 0):
@@ -57,32 +58,28 @@ class Imagecutter:
                 avg_depth_prev = numpy.mean(prev_depth[y1_prev:y2_prev, x1_prev:x2_prev])
                 avg_depth_curr = numpy.mean(curr_depth[y1_curr:y2_curr, x1_curr:x2_curr])
 
-                im = Image.fromarray(prev_color)
-                im.save('springmittel03'+str(index)+'.jpeg')
-
-                counter = 0
-
-                if (avg_depth_prev - avg_depth_curr) > 0.0015 and counter < 8:
+                if 0.002 < (avg_depth_prev - avg_depth_curr) < 0.005 and counter < 7:
                     self.subtractor_list.append({'observation_color': prev_color, 'observation_depth': prev_depth})
                     self.final_image_list.append({'observation_color': prev_color})
                     counter = counter + 1
-                    im = Image.fromarray(prev_color['observation_color'])
-                    im.save('springmittel'+str(index)+'.jpeg')
-                    return counter
+                    im = Image.fromarray(prev_color)
+                    im.save('springmittelx'+str(index)+'.jpeg')
+                    if counter == 7:
+                        x = avg_depth_prev
 
-                elif counter == 7 and index == length_cropped_list and (self.subtractor_list[6]['observation_depth'] - curr_depth) > 0.0015:
+                elif counter == 7 and index == length_cropped_list and 0.0015 < (x - avg_depth_curr) < 0.008:
                     self.subtractor_list.append({'observation_color': curr_color, 'observation_depth': curr_depth})
                     self.final_image_list.append({'observation_color': curr_color})
                     counter = counter + 1
                     im = Image.fromarray(curr_color['observation_color'])
-                    im.save('springmittel' + str(index) + '.jpeg')
+                    im.save('springmittelx' + str(index) + '.jpeg')
                     print(self.final_image_list)
 
                     if counter == 8:
                         print('The observation has been created successfully')
                         exit(0)
 
-                return self.final_image_list
+        return self.final_image_list
 
 
 
