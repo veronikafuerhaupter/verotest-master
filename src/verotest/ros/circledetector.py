@@ -5,29 +5,13 @@ from imagehandler import Imagehandler
 from PIL import Image
 from shapedetector import ShapeDetector
 
-'''class Circledetector:
-
-    circle_full_list = None
-    circle_color_list = None
-
-    def __init__(self):
-        self.circle_color_list = []
-        self.circle_full_list = []
-
-    def create_circlecut(self, cropped_list):
-
-        length_cropped_list = len(cropped_list)
-        counter = 0
-
-        for index, elem in enumerate(cropped_list):
-
-            # load the image, clone it for output, and then convert it to grayscale'''
 # load the image and resize it to a smaller factor so that
 # the shapes can be approximated better
-image = cv2.imread('CroppedList1.jpg')
+image = cv2.imread('CroppedList1_sample.jpg')
 resized = imutils.resize(image, width=300)
 ratio = image.shape[0] / float(resized.shape[0])
 print(image.shape)
+shape_list = []
 
 # invert image
 #invert = np.invert(image)
@@ -36,7 +20,6 @@ print(image.shape)
 # and threshold it
 gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
 blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-
 thresh = cv2.threshold(blurred, 60, 255, cv2.THRESH_BINARY)[1]
 invert = np.invert(thresh)
 im = Image.fromarray(invert)
@@ -66,7 +49,7 @@ for c in cnts:
 		cX = int((M["m10"] / M["m00"]) * ratio)
 		cY = int((M["m01"] / M["m00"]) * ratio)
 	shape = sd.detect(c)
-	list.append(shape)
+	shape_list.append(shape)
 	# multiply the contour (x, y)-coordinates by the resize ratio,
 	# then draw the contours and the name of the shape on the image
 	c = c.astype("float")

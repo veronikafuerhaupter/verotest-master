@@ -46,13 +46,13 @@ def observationbuilder(): #Logik checken ob queue leer ist, if empty dann timeou
                 print('No Springmittel detected')
             elif not predictions_springmittel:
                 print('No Springmittel detected')
-            elif predictions_springmittel[0]['probability'] > 0.5:
+            elif predictions_springmittel[0]['probability'] > 0.6:
                 print('Springmittel detected')
                 counter_springmittel = 1
                 springmittel_color_cropped, springmittel_depth_cropped = imagehandler.crop_springmittel(predictions_springmittel, pallet_color_width, pallet_color_height, pallet_depth_cropped, pallet_color_cropped)
                 cropped_list = imagehandler.handle_cropped_img(springmittel_color_cropped, springmittel_depth_cropped)
-                im = Image.fromarray(springmittel_color_cropped)
-                im.save('Springmittel_cropped'+str(counter_springmittel)+'.jpeg')
+                #im = Image.fromarray(springmittel_color_cropped)
+                #im.save('Springmittel_cropped'+str(counter_springmittel)+'.jpeg')
                 counter_springmittel = counter_springmittel + 1
             else:
                 print('No Springmittel')
