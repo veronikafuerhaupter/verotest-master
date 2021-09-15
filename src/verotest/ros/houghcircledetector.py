@@ -4,7 +4,7 @@ import argparse
 import cv2
 
 # load the image, clone it for output, and then convert it to grayscale
-image = cv2.imread("CroppedList1_sample.jpg")
+image = cv2.imread("Pallette28.jpg")
 output = image.copy()
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 blurred = cv2.GaussianBlur(gray, (5, 5), 0)
@@ -12,7 +12,7 @@ thresh = cv2.threshold(blurred, 60, 255, cv2.THRESH_BINARY)[1]
 invert = np.invert(thresh)
 
 # detect circles in the image
-circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, dp=1, minDist=50, param1=350, param2=10, minRadius=10, maxRadius=20)
+circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, dp=1, minDist=300, param1=600, param2=30, minRadius=5, maxRadius=20)
 
 # ensure at least some circles were found
 if circles is not None:

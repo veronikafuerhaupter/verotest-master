@@ -36,6 +36,9 @@ class Imagecutter:
                 prev_color = cropped_list[index - 1]['color']
                 curr_color = cropped_list[index]['color']
 
+                im = Image.fromarray(prev_color)
+                im.save("CroppedList"+str(index-1)+".jpg")
+
                 prev_output = prev_color.copy()
                 curr_output = curr_color.copy()
 

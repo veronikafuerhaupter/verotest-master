@@ -42,11 +42,13 @@ def observationbuilder(): #Logik checken ob queue leer ist, if empty dann timeou
             print('Pallet detected')
             pallet_depth_cropped, pallet_color_cropped, pallet_color_height, pallet_color_width = imagehandler.crop_pallet(predictions, color_width, color_height, color_cropped, depth_cropped)
             predictions_springmittel = imagehandler.predict_springmittel(pallet_color_cropped)
+            im = Image.fromarray(pallet_color_cropped)
+            im.save('Pallette'+str(counter)+'.jpg')
             if predictions_springmittel is None:
                 print('No Springmittel detected')
             elif not predictions_springmittel:
                 print('No Springmittel detected')
-            elif predictions_springmittel[0]['probability'] > 0.6:
+            elif predictions_springmittel[0]['probability'] > 0.7:
                 print('Springmittel detected')
                 counter_springmittel = 1
                 springmittel_color_cropped, springmittel_depth_cropped = imagehandler.crop_springmittel(predictions_springmittel, pallet_color_width, pallet_color_height, pallet_depth_cropped, pallet_color_cropped)
