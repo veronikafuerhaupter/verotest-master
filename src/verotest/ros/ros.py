@@ -32,6 +32,7 @@ class Ros:
     def _subscribe(self, topic, message, subscriber, parser=None):
         rospy.Subscriber(topic, message, lambda msg: subscriber(parser(msg)) if parser is not None else subscriber(msg), queue_size=3)
         self.logger.debug('Start listening on topic ' + topic)
+    #def subscribe_interesting timestamp
 
     def _publish(self, topic, message_type, message):
         if topic in self.publish_dict:
