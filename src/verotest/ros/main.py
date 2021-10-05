@@ -75,8 +75,8 @@ def observationbuilder(): #Logik checken ob queue leer ist, if empty dann timeou
                 # Crop predicted Springmittel in the pallet
                 springmittel_color_cropped, springmittel_depth_cropped = imagehandler.crop_springmittel_circles(circles,pallet_color_cropped, pallet_depth_cropped)
                 cropped_list = imagehandler.handle_cropped_img(springmittel_color_cropped, springmittel_depth_cropped)
-                im = Image.fromarray(springmittel_color_cropped)
-                im.save("Springmittel_cropped"+str(counter)+".jpeg")
+                #im = Image.fromarray(springmittel_color_cropped)
+                #im.save("Springmittel_cropped"+str(counter)+".jpeg")
                 counter = counter + 1
 
             else:

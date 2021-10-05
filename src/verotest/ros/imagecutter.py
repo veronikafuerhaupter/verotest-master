@@ -34,11 +34,11 @@ class Imagecutter:
         for index, elem in enumerate(cropped_list):
 
             # Append first without considering it as an outlier
-            if index < 2:
+            '''if index < 2:
                 self.outlierfree_list.append(cropped_list[index])
                 im = Image.fromarray(cropped_list[index]['color'])
                 im.save("cuttet_cropped" + str(numerator) + ".jpeg")
-                continue
+                continue'''
 
             depth_cropped_list = cropped_list[index]['depth']
             ratio_x_depth = depth_cropped_list.shape[1] / 56
@@ -55,17 +55,47 @@ class Imagecutter:
 
             # Consider the inner circle of the Springmittel as surface with changing depth
             avg_depth = np.mean(depth_cropped_list[y1:y2, x1:x2])
+            numerator = numerator + avg_depth
+            denominator = denominator + 1
+            continue
 
-            if index == 2:
+            '''if index < 1:
                 self.outlierfree_list.append(cropped_list[index])
                 im = Image.fromarray(cropped_list[index]['color'])
                 im.save("cuttet_cropped" + str(numerator) + ".jpeg")
                 avg = avg_depth
                 counter = avg_depth
                 denominator = 1
+                continue'''
+
+        avg = numerator / denominator
+
+        for index, elem in enumerate(cropped_list):
+            depth_cropped_list = cropped_list[index]['depth']
+            ratio_x_depth = depth_cropped_list.shape[1] / 56
+            ratio_y_depth = depth_cropped_list.shape[0] / 56
+
+            center_point_x = depth_cropped_list.shape[1] / 2
+            center_point_y = depth_cropped_list.shape[0] / 2
+
+            x1 = int(center_point_x - 10 * ratio_x_depth)
+            x2 = int(center_point_x + 10 * ratio_x_depth)
+
+            y1 = int(center_point_y - 10 * ratio_y_depth)
+            y2 = int(center_point_y + 10 * ratio_y_depth)
+
+            # Consider the inner circle of the Springmittel as surface with changing depth
+            avg_depth = np.mean(depth_cropped_list[y1:y2, x1:x2])
+
+            difference = avg - avg_depth
+
+            if -0.06 < difference < 0.06:
+                self.outlierfree_list.append(cropped_list[index])
                 continue
 
-            # Eliminate depth differences bigger 5mm considering the variation of depth when placing a Springmittel
+        return self.outlierfree_list
+
+        '''# Eliminate depth differences bigger 5mm considering the variation of depth when placing a Springmittel
             elif index > 2:
                 x = avg - avg_depth
                 if -0.005 < x < 0.005:
@@ -76,9 +106,8 @@ class Imagecutter:
                     avg = counter / denominator
                     im = Image.fromarray(cropped_list[index]['color'])
                     im.save("cuttet_cropped"+str(numerator)+".jpeg")
-                    continue
+                    continue'''
 
-        return self.outlierfree_list
 
     def create_observations(self, outlierfree_list):
         """
@@ -93,8 +122,8 @@ class Imagecutter:
 
         for index, elem in enumerate(self.outlierfree_list):
 
-            #im = Image.fromarray(self.outlierfree_list[index]['color'])
-            #im.save("cuttet_cropped"+str(index)+".jpeg")
+            im = Image.fromarray(self.outlierfree_list[index]['color'])
+            im.save("cuttet_cropped"+str(index)+".jpeg")
 
             # Comparing previous and current depth in order to detect changes in depth when placing a new Springmittel
             if (index+1 <= len(self.outlierfree_list) and index - 1 >= 0):
