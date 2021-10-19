@@ -1,8 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="verofuerhaupter@172.31.143.168:22" remoteFilesAllowedToDisappearOnAutoupload="false">
+  <component name="PublishConfigData" autoUpload="Always" serverName="verofuerhaupter@172.31.189.163:22" remoteFilesAllowedToDisappearOnAutoupload="false">
     <serverData>
-      <paths name="verofuerhaupter@172.31.143.168:22">
+      <paths name="robin4lemi">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/robin4lemi/catkin_ws/src/verotest-master" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="robin4lemi@192.168.137.126:22 key">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/robin4lemi/catkin_ws/src/verotest-master" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="verofuerhaupter@172.31.189.163:22">
         <serverdata>
           <mappings>
             <mapping deploy="/home/verofuerhaupter/catkin_ws/src/verotest-master" local="$PROJECT_DIR$" />
