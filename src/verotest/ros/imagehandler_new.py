@@ -158,6 +158,32 @@ class Imagehandler:
 
         return predictions_springmittel
 
+    def crop_springmittel(self, predictions_springmittel, pallet_color_width, pallet_color_height, pallet_color_cropped, pallet_depth_cropped):
+        """
+        This method crops the predicted pallet in its dimensions
+        """
+        springmittel_depth_cropped = None
+        springmittel_color_cropped = None
+        springmittel_color_height = None
+        springmittel_color_width = None
+
+        for i in range(0, len(predictions_springmittel)):
+            left = int(predictions_springmittel[i]['boundingBox']['left'] * pallet_color_width)
+            top = int(predictions_springmittel[i]['boundingBox']['top'] * pallet_color_height)
+            right = int(left + predictions_springmittel[i]['boundingBox']['width'] * pallet_color_width)
+            bottom = int(top + predictions_springmittel[i]['boundingBox']['height'] * pallet_color_height)
+
+            springmittel_color_cropped = pallet_color_cropped[top:bottom, left:right]
+            springmittel_depth_cropped = pallet_depth_cropped[int(top / 2):int(bottom / 2), int(left / 2):int(right / 2)]
+
+            springmittel_color_width = springmittel_color_cropped.shape[1]
+            springmittel_color_height = springmittel_color_cropped.shape[0]
+
+            springmittel_depth_width = springmittel_depth_cropped.shape[1]
+            springmittel_depth_height = springmittel_depth_cropped.shape[0]
+
+            return springmittel_depth_cropped, springmittel_color_cropped, springmittel_color_height, springmittel_color_width
+
 
     def handle_cropped_img(self, springmittel_color_cropped, springmittel_depth_cropped):
 
