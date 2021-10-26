@@ -69,8 +69,9 @@ class Imagecutter:
                                     pallet_depth_cropped, pallet_color_cropped, pallet_color_height, pallet_color_width = imagehandler.crop_pallet(predictions, color_width, color_height, color_cropped, depth_cropped)
 
                                     predictions_springmittel = imagehandler.predict_springmittel(pallet_color_cropped)
+                                    print(predictions_springmittel)
 
-                                    if predictions is None:
+                                    if predictions_springmittel is None:
                                         print('No Springmittel detected')
                                         continue
 
