@@ -116,16 +116,42 @@ class Imagehandler:
             return pallet_depth_cropped, pallet_color_cropped, pallet_color_height, pallet_color_width
 
 
-    def predict_circles(self, pallet_color_cropped):
+    def predict_circles(self, springmittel_color_cropped):
         """
         This method uses the Hough Circle Transformation for detecting the inner circle within the Springmittel.
         The maximum radius of 20 pixels ensures that the inner circle is detected, whereas the minimum distance of 300 pixels
         to other circles ensures that only one circle on the cropped pallet is detected.
         """
         gray = cv2.cvtColor(pallet_color_cropped, cv2.COLOR_BGR2GRAY)
-        circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, dp=3, minDist=300, param1=600, param2=20, minRadius=12, maxRadius=14)
+        circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, dp=3, minDist=500, param1=700, param2=40, minRadius=6, maxRadius=15)
 
         return circles
+
+    def calccrop_coordinates(self, circles, pallet_color_cropped, pallet_depth_cropped, pallet_color_height, pallet_color_width, predictions_springmittel):
+        """
+        This method uses the coordinates from the Springmittel prediction (Bounding Box coordinates) and the coordinates
+        from the circle prediction to calculate new coordinates for cropping a more accurate Springmittel
+        """
+        for i in range(0, len(predictions_springmittel)):
+            left = int(predictions_springmittel[i]['boundingBox']['left'] * pallet_color_width)
+            top = int(predictions_springmittel[i]['boundingBox']['top'] * pallet_color_height)
+            right = int(left + predictions_springmittel[i]['boundingBox']['width'] * pallet_color_width)
+            bottom = int(top + predictions_springmittel[i]['boundingBox']['height'] * pallet_color_height)
+
+            ratio_circles = circles[0][0][2] / 8
+            distance_circle_x = circles[0][0][0]
+            distance_circle_y = circles[0][0][1]
+            dist_total_x = left + distance_circle_x
+            dist_total_y = top + distance_circle_y
+            left_crop = dist_total_x - 28 * ratio_circles
+            right_crop = dist_total_x + 28 * ratio_circles
+            top_crop = dist_total_y - 28 * ratio_circles
+            bottom_crop = dist_total_y + 28 * ratio_circles
+
+            springmittel_color_cropped = pallet_color_cropped[top_crop:bottom_crop, left_crop:right_crop]
+            springmittel_depth_cropped = pallet_depth_cropped[int(top_crop / 2):int(bottom_crop / 2), int(left_crop / 2):int(right_crop / 2)]
+
+            return springmittel_color_cropped, springmittel_depth_cropped
 
 
     def crop_circles(self, circles, pallet_color_cropped, pallet_depth_cropped):

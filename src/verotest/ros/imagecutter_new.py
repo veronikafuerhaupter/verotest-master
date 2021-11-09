@@ -75,11 +75,11 @@ class Imagecutter:
                                         print('No Springmittel detected')
                                         continue
 
-                                    if predictions_springmittel[0]['probability'] > 0.6:
+                                    if predictions_springmittel[0]['probability'] > 0.5:
                                         print('Springmittel detected')
                                         springmittel_depth_cropped, springmittel_color_cropped, springmittel_color_height, springmittel_color_width = imagehandler.crop_springmittel(predictions_springmittel, pallet_color_width, pallet_color_height, pallet_color_cropped, pallet_depth_cropped)
-                                        directory_col = dir_path_observations + '/img_springmittel_cropped' + str(counter)
-                                        directory_depth = dir_path_observations + '/img_springmittel_cropped' + str(counter)
+                                        directory_col = dir_path_observations + '/img_sm_col_cropped' + str(counter)
+                                        directory_depth = dir_path_observations + '/img_sm_depth_cropped' + str(counter)
                                         im = Image.fromarray(springmittel_color_cropped)
                                         im.save(str(dir_path_observations) + '/img_springmittel' + str(counter) + '.png')
                                         # im.save(str(dir_path_observations) + '/img_pallet' + str(counter) + '.png')
