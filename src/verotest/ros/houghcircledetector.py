@@ -2,17 +2,19 @@
 import numpy as np
 import argparse
 import cv2
+import PIL
 
 # load the image, clone it for output, and then convert it to grayscale
-image = cv2.imread("img_springmittel5.png")
+image = cv2.imread("img_pallet1.png")
 output = image.copy()
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
 blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 thresh = cv2.threshold(blurred, 60, 255, cv2.THRESH_BINARY)[1]
 invert = np.invert(thresh)
 
 # detect circles in the image
-circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, dp=3, minDist=500, param1=700, param2=40, minRadius=6, maxRadius=15)
+circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, dp=3, minDist=500, param1=700, param2=40, minRadius=9, maxRadius=13)
 
 # ensure at least some circles were found
 if circles is not None:
