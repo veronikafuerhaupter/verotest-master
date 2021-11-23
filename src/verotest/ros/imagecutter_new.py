@@ -3,6 +3,7 @@ import os
 import re
 import numpy as np
 from PIL import Image
+from pathlib import Path
 
 imagehandler = Imagehandler()
 
@@ -88,11 +89,21 @@ class Imagecutter:
                                         if springmittel_color_cropped is not None:
                                             # save cropped Springmittel
                                             directory_col = dir_path_observations + '\\springmittel_col_cropped' + str(counter)
+                                            depth_cropped = 'springmittel_depth_cropped' + str(counter) + '.npy'
                                             directory_depth = dir_path_observations + '\\springmittel_depth_cropped' + str(counter)
                                             im = Image.fromarray(springmittel_color_cropped)
-                                            im.save(str(dir_path_observations) + '\\img_springmittel' + str(counter) + '.png')
-                                            np.save(directory_col, springmittel_color_cropped)
-                                            np.save(directory_depth, springmittel_color_cropped)
+                                            file_depth = 'springmittel_depth_cropped' + str(counter) + '.npy'
+                                            #my_file = 'img_springmittel_col_cropped'+str(counter)+'.png'
+                                            #im.save(str(dir_path_observations) + '\\img_springmittel' + str(counter) + '.png')
+                                            owd = os.getcwd()
+                                            os.chdir(dir_path_observations)
+                                            print(os.getcwd())
+                                            if os.path.exists('springmittel_col_cropped1.npy'):
+                                                np.save(file_depth, springmittel_depth_cropped)
+                                                os.chdir(owd)
+                                                print(os.getcwd())
+                                            #np.save(directory_col, springmittel_color_cropped)
+                                            #np.save(directory_depth, springmittel_depth_cropped)
                                             continue
 
                                         else:
@@ -111,90 +122,26 @@ class Imagecutter:
                                         print('No Springmittel detected')
                                         break
 
-                                    # crop Springmittel according to the circles coordinates
+                                    # crop Springmittel according to the circles coordinates of the first detected circle assuming the pallet does not move while assembly
                                     springmittel_color_cropped, springmittel_depth_cropped = imagehandler.crop_circles(circles, pallet_color_cropped, pallet_depth_cropped)
 
                                     # save cropped Springmittel
                                     directory_col = dir_path_observations + '\\springmittel_col_cropped' + str(counter)
                                     directory_depth = dir_path_observations + '\\springmittel_depth_cropped' + str(counter)
+                                    file_depth = 'springmittel_depth_cropped'+str(counter)
                                     im = Image.fromarray(springmittel_color_cropped)
-                                    im.save(str(dir_path_observations) + '\\img_springmittel' + str(counter) + '.png')
-                                    np.save(directory_col, springmittel_color_cropped)
-                                    np.save(directory_depth, springmittel_color_cropped)
+                                    owd = os.getcwd()
+                                    os.chdir(dir_path_observations)
+                                    print(os.getcwd())
+                                    if os.path.exists('springmittel_col_cropped1.npy'):
+                                        np.save(file_depth, springmittel_depth_cropped)
+                                        os.chdir(owd)
+                                        print(os.getcwd())
+                                    #im.save(str(dir_path_observations) + '\\img_springmittel' + str(counter) + '.png')
+                                    #np.save(directory_col, springmittel_color_cropped)
+                                    #np.save(directory_depth, springmittel_depth_cropped)
                                     continue
 
-                                '''predictions_springmittel = imagehandler.predict_springmittel(pallet_color_cropped)
-                                    print(predictions_springmittel)
-
-                                    if not predictions_springmittel:
-                                        print('No Springmittel detected')
-                                        continue
-
-                                    if predictions_springmittel[0]['probability'] > 0.6:
-                                        print('Springmittel detected')
-
-                                        # predict the Springmittel from the pallet via Springmittel Model from Azure ML
-                                        springmittel_depth_cropped, springmittel_color_cropped, springmittel_color_height, springmittel_color_width = imagehandler.crop_springmittel(predictions_springmittel, pallet_color_width, pallet_color_height, pallet_color_cropped, pallet_depth_cropped)
-
-                                        im = Image.fromarray(springmittel_color_cropped)
-                                        im.save(str(dir_path_observations) + '\\img_springmittelAzure' + str(counter) + '.png')
-
-                                        # identify circles within the Springmittel
-                                        circles = imagehandler.predict_circles(springmittel_color_cropped)
-
-                                        # crop ratio area around the Springmittel with ratio from circle detection
-                                        if circles is not None:
-                                            sm_circle_color_cropped, sm_circle_depth_cropped = imagehandler.calccrop_coordinates(circles, pallet_color_cropped, pallet_depth_cropped, pallet_color_height, pallet_color_width, predictions_springmittel)
-
-                                            # save cropped Springmittel
-                                            directory_col = dir_path_observations + '\\img_sm_col_cropped' + str(counter)
-                                            directory_depth = dir_path_observations + '\\img_sm_depth_cropped' + str(counter)
-                                            im = Image.fromarray(sm_circle_color_cropped)
-                                            im.save(str(dir_path_observations) + '\\img_springmittel' + str(counter) + '.png')
-                                            # im.save(str(dir_path_observations) + '/img_pallet' + str(counter) + '.png')
-                                            np.save(directory_col, sm_circle_color_cropped)
-                                            np.save(directory_depth, sm_circle_depth_cropped)
-
-                                    else:
-                                        print('No Springmittel found')
-
-                                else:
-                                    print('No Pallet found')
-
-                                    # predict if Springmittel is in pallet via the inner radius
-                                    circles = imagehandler.predict_circles(pallet_color_cropped)
-
-                                    if circles is None:
-                                        print('No Circles detected')
-                                        continue
-
-                                    # crop the Springmittel according to its radius
-                                    if circles is not None:
-                                        # Crop predicted Springmittel in the pallet
-                                        circle_color_cropped, circle_depth_cropped = imagehandler.crop_circles(circles, pallet_color_cropped, pallet_depth_cropped)
-
-                                        predictions_springmittel = imagehandler.predict_springmittel(circle_color_cropped)
-
-                                        directory_col = dir_path_observations + '/img_circle_cropped' + str(counter)
-                                        directory_depth = dir_path_observations + '/img_circle_cropped' + str(counter)
-
-                                        if predictions_springmittel[0]['probability'] > 0.8:
-                                            np.save(directory_col, circle_color_cropped)
-                                            np.save(directory_depth, circle_depth_cropped)
-
-
-                                        elif:
-                                            continue
-
-                                        #print(os.getcwd())
-                                        #im = Image.fromarray(pallet_color_cropped)
-                                        #im.save('observation' + str(version) + '/img_pallet' + str(counter) + '.png')
-                                        #im.save(str(dir_path_observations) + '/img_pallet' + str(counter) + '.png')
-
-
-                                        #self.color_list.append(springmittel_color_cropped)
-                                        #self.depth_list.append(springmittel_depth_cropped)
-                                        #print('Springmittel detected')'''
 
 imagecutter = Imagecutter()
 imagecutter.iterate_file()

@@ -5,7 +5,7 @@ import cv2
 import PIL
 
 # load the image, clone it for output, and then convert it to grayscale
-image = cv2.imread("img_pallet1.png")
+image = cv2.imread("img_pallet96.png")
 output = image.copy()
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -14,7 +14,8 @@ thresh = cv2.threshold(blurred, 60, 255, cv2.THRESH_BINARY)[1]
 invert = np.invert(thresh)
 
 # detect circles in the image
-circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, dp=3, minDist=500, param1=700, param2=40, minRadius=9, maxRadius=13)
+print(image.shape())
+circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, dp=3, minDist=700, param1=500, param2=40, minRadius=9, maxRadius=14)
 
 # ensure at least some circles were found
 if circles is not None:
